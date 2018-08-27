@@ -15,14 +15,18 @@
 # ===============================================================================
 import unittest
 
+from bounds import RasterBounds
+
 
 class MyTestCase(unittest.TestCase):
 
     def setUp(self):
-        pass
+        self.image = 'LE07_clip_L1TP_039027_20130726_20160907_01_T1_B3.TIF'
 
     def test_something(self):
-        self.assertEqual(True, False)
+        bb = RasterBounds(raster=self.image)
+        self.assertEqual(bb.get_nwse_tuple(), (47.61118761194992, -111.94851161596767,
+                                               47.54916612467683, -111.8361513308256))
 
 
 if __name__ == '__main__':

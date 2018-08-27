@@ -61,7 +61,7 @@ class RasterBounds(BBox):
     
     """
 
-    def __init__(self, raster=None, affine_transform=None, profile=None, latlon=True):
+    def __init__(self, raster=None, profile=None, latlon=True):
         BBox.__init__(self)
 
         if raster:
