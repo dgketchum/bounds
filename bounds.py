@@ -61,12 +61,19 @@ class RasterBounds(BBox):
     
     """
 
-    def __init__(self, raster=None, profile=None, latlon=True):
+    def __init__(self, raster=None, affine_transform=None, profile=None, latlon=True):
         BBox.__init__(self)
 
         if raster:
             with rasopen(raster, 'r') as src:
                 profile = src.profile
+                affine = profile['affine']
+
+        if profile:
+            affine = profile['affine']
+
+        if affine_transform:
+            affine = affine_transform
 
         col, row = 0, 0
         w, n = profile['affine'] * (col, row)
