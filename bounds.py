@@ -69,16 +69,13 @@ class RasterBounds(BBox):
                 profile = src.profile
                 affine = profile['affine']
 
-        if profile:
-            affine = profile['affine']
-
         if affine_transform:
             affine = affine_transform
 
         col, row = 0, 0
-        w, n = profile['affine'] * (col, row)
+        w, n = affine * (col, row)
         col, row = profile['width'], profile['height']
-        e, s = profile['affine'] * (col, row)
+        e, s = affine * (col, row)
 
         if latlon and profile['crs'] != CRS({'init': 'epsg:4326'}):
             in_proj = Proj(init=profile['crs']['init'])
