@@ -26,7 +26,6 @@ class BBox(object):
         in_proj = Proj({'init': 'epsg:3857'})
         w, s = in_proj(self.west, self.south)
         e, n = in_proj(self.east, self.north)
-
         return w, s, e, n
 
     def to_mt_sp(self):
@@ -34,7 +33,20 @@ class BBox(object):
                        'lon_0=-109.5 +x_0=600000 +y_0=LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF +ellps=GRS80 +units=m +no_defs')
         w, s = in_proj(self.west, self.south)
         e, n = in_proj(self.east, self.north)
+        return w, s, e, n
 
+    def to_epsg(self, epsg):
+        in_proj = Proj({'init': 'epsg:{}'.format(epsg)})
+        w, s = in_proj(self.west, self.south)
+        e, n = in_proj(self.east, self.north)
+        return w, s, e, n
+
+
+    def to_lambert_conformal_conic(self):
+        """ To EPSG 201004 """
+        in_proj = Proj('+proj=lcc +lat_1=33 +lat_2=45 +lat_0=39 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs')
+        w, s = in_proj(self.west, self.south)
+        e, n = in_proj(self.east, self.north)
         return w, s, e, n
 
 
