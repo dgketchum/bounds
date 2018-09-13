@@ -41,10 +41,9 @@ class BBox(object):
         e, n = in_proj(self.east, self.north)
         return w, s, e, n
 
-
     def to_lambert_conformal_conic(self):
-        """ To EPSG 201004 """
-        in_proj = Proj('+proj=lcc +lat_1=33 +lat_2=45 +lat_0=39 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs')
+        in_proj = Proj('+ellps=GRS80 +lat_0=23 +lat_1=29.5 +lat_2=45.5 +lon_0=-96 +no_defs +proj=aea'
+                       ' +towgs84=0,0,0,0,0,0,0 +units=m +x_0=0 +y_0=0')
         w, s = in_proj(self.west, self.south)
         e, n = in_proj(self.east, self.north)
         return w, s, e, n
