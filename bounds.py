@@ -1,3 +1,4 @@
+from math import ceil, floor
 from pyproj import Proj
 from rasterio import open as rasopen
 from rasterio.crs import CRS
@@ -47,6 +48,30 @@ class BBox(object):
         w, s = in_proj(self.west, self.south)
         e, n = in_proj(self.east, self.north)
         return w, s, e, n
+
+    def expand(self, **delta):
+
+        if not delta:
+            if self.west < 0:
+                self.west = floor(self.west)
+                self.east = ceil(self.east)
+            else:
+                self.west = ceil(self.west)
+                self.east = floor(self.east)
+
+            if self.north > 0:
+                self.north = ceil(self.north)
+                self.south = floor(self.south)
+            else:
+                self.north = floor(self.north)
+                self.south = ceil(self.south)
+
+        else:
+
+            self.west += delta['west']
+            self.east += delta['east']
+            self.north += delta['north']
+            self.south += delta['south']
 
 
 class GeoBounds(BBox):
