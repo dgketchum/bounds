@@ -103,7 +103,7 @@ class RasterBounds(BBox):
         if raster:
             with rasopen(raster, 'r') as src:
                 profile = src.profile
-                affine = profile['affine']
+                affine = profile['transform']
 
         if affine_transform:
             affine = affine_transform
