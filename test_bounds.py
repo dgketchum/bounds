@@ -14,6 +14,9 @@
 # limitations under the License.
 # ===============================================================================
 import unittest
+import sys
+import os
+sys.path.append(os.path.dirname(__file__))
 
 from bounds import RasterBounds
 
@@ -21,7 +24,7 @@ from bounds import RasterBounds
 class MyTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.image = 'LE07_clip_L1TP_039027_20130726_20160907_01_T1_B3.TIF'
+        self.image = os.path.join(os.path.dirname(__file__), 'LE07_clip_L1TP_039027_20130726_20160907_01_T1_B3.TIF')
 
     def test_something(self):
         bb = RasterBounds(raster=self.image)
