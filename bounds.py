@@ -1,4 +1,5 @@
 from math import ceil, floor
+
 from pyproj import Proj
 from rasterio import open as rasopen
 from rasterio.crs import CRS
@@ -40,6 +41,15 @@ class BBox(object):
         in_proj = Proj({'init': 'epsg:{}'.format(epsg)})
         w, s = in_proj(self.west, self.south)
         e, n = in_proj(self.east, self.north)
+        return w, s, e, n
+
+    def to_geographic(self, epsg):
+        in_proj = Proj({'init': 'epsg:{}'.format(epsg)})
+
+        w, s = in_proj(self.west, self.south, inverse=True)
+
+        e, n = in_proj(self.east, self.north, inverse=True)
+
         return w, s, e, n
 
     def to_lambert_conformal_conic(self):
