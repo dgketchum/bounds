@@ -32,7 +32,7 @@ except ImportError:
 with open('README.md') as f:
     readme = f.read()
 
-tag = '0.0.4'
+tag = '0.0.5'
 
 setup(name='bounds',
       version=tag,
