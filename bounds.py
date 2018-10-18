@@ -3,7 +3,8 @@ from math import ceil, floor
 from pyproj import Proj
 from rasterio import open as rasopen
 from rasterio.crs import CRS
-
+from fiona import open as fopen
+import fiona
 
 class BBox(object):
     def __init__(self):
@@ -86,25 +87,30 @@ class BBox(object):
 
 class GeoBounds(BBox):
     """Spatial bounding box
-    
-    By default, represents a buffered bounding box around the conterminous U.S.   
-     
-     
+
+
     """
 
-    def __init__(self, west=-126.0, south=22.0, east=-64.0, north=53.0):
+    def __init__(self, west=None, south=None, east=None, north=None, wsen=None):
         BBox.__init__(self)
-        self.west = west
-        self.south = south
-        self.east = east
-        self.north = north
+
+        if wsen:
+            self.west = wsen[0]
+            self.south = wsen[1]
+            self.east = wsen[2]
+            self.north = wsen[3]
+        else:
+            self.west = west
+            self.south = south
+            self.east = east
+            self.north = north
 
 
 class RasterBounds(BBox):
     """ Spatial bounding box from raster extent.
-    
+
     :param raster
-    
+
     """
 
     def __init__(self, raster=None, affine_transform=None, profile=None, latlon=True):
@@ -133,6 +139,32 @@ class RasterBounds(BBox):
 
     def get_nwse_tuple(self):
         return self.north, self.west, self.south, self.east
+
+class VectorBounds(BBox):
+    """ Spatial bounding box from vector extent.
+
+    :param vector
+
+    """
+
+    def __init__(self, vector=None, profile=None, latlon=True):
+        BBox.__init__(self)
+
+        if vector:
+            with fopen(vector, 'r') as src:
+                self.crs = src.crs
+                self.epsg = int(src.crs['init'].split(":")[1])
+                self.profile = src.profile
+                self.meta = src.meta
+                self.west, self.south, self.east, self.north = src.bounds
+
+        if latlon and self.crs != {'init': 'epsg:4326'}:
+            in_proj = Proj(init=self.profile['crs']['init'])
+            self.west, self.north = in_proj(self.west, self.north, inverse=True)
+            self.east, self.south = in_proj(self.east, self.south, inverse=True)
+
+        else:
+            pass
 
 
 if __name__ == '__main__':
