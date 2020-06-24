@@ -4,6 +4,7 @@ from pyproj import Proj
 from rasterio import open as rasopen
 from rasterio.crs import CRS
 from fiona import open as fopen
+from shapely.geometry import Polygon
 import fiona
 
 class BBox(object):
@@ -42,49 +43,23 @@ class BBox(object):
         in_proj = Proj({'init': 'epsg:{}'.format(epsg)})
         w, s = in_proj(self.west, self.south)
         e, n = in_proj(self.east, self.north)
-        return w, s, e, n
-
-    def point_to_epsg(self, epsg, lat, lon):
-        in_proj = Proj({'init': 'epsg:{}'.format(epsg)})
-        lon, lat = in_proj(lon, lat)
-        return lat, lon
+        return GeoBounds(west=w, south=s, east=e, north=n)
 
     def to_geographic(self, epsg):
         in_proj = Proj({'init': 'epsg:{}'.format(epsg)})
-        w, s = in_proj(self.west, self.south, inverse=True)
-        e, n = in_proj(self.east, self.north, inverse=True)
-        return w, s, e, n
 
-    def lambert_cc_to_geographic(self):
-        in_proj = Proj('+proj=lcc +lat_1=45 +lat_2=49 +lat_0=44.25 +lon_0=-109.5 +x_0=600000 '
-                       '+y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs')
         w, s = in_proj(self.west, self.south, inverse=True)
+
         e, n = in_proj(self.east, self.north, inverse=True)
+
         return w, s, e, n
 
     def to_lambert_conformal_conic(self):
-        in_proj = Proj('+proj=lcc +lat_1=45 +lat_2=49 +lat_0=44.25 +lon_0=-109.5 +x_0=600000 '
-                       '+y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs')
+        in_proj = Proj('+ellps=GRS80 +lat_0=23 +lat_1=29.5 +lat_2=45.5 +lon_0=-96 +no_defs +proj=aea'
+                       ' +towgs84=0,0,0,0,0,0,0 +units=m +x_0=0 +y_0=0')
         w, s = in_proj(self.west, self.south)
         e, n = in_proj(self.east, self.north)
         return w, s, e, n
-
-    def point_to_lambert_conformal_conic(self, lat, lon):
-        in_proj = Proj('+proj=lcc +lat_1=45 +lat_2=49 +lat_0=44.25 +lon_0=-109.5 +x_0=600000 '
-                       '+y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs')
-        lon, lat = in_proj(lon, lat)
-        return lat, lon
-
-    def geographic_to_utm_zone(self, lat, lon):
-        utm_band = str((floor((lon + 180) / 6) % 60) + 1)
-        if len(utm_band) == 1:
-            utm_band = '0' + utm_band
-        if lat >= 0:
-            epsg_code = '326' + utm_band
-        else:
-            epsg_code = '327' + utm_band
-
-        return epsg_code
 
     def expand(self, **delta):
 
@@ -110,20 +85,12 @@ class BBox(object):
             self.north += delta['north']
             self.south += delta['south']
 
+    def get_shapely_polygon(self):
+        return Polygon([(self.west, self.north),
+                        (self.east, self.north),
+                        (self.east, self.south),
+                        (self.west, self.south)])
 
-class BufferPoint(BBox):
-    def __init__(self):
-        BBox.__init__(self)
-
-    def buffer_meters(self, lat, lon, distance):
-        epsg = self.geographic_to_utm_zone(lat, lon)
-        y, x = self.point_to_epsg(epsg, lat, lon)
-        self.west = x - distance
-        self.south = y - distance
-        self.east = x + distance
-        self.north = y + distance
-        self.west, self.south, self.east, self.north = self.to_geographic(epsg)
-        return self.west, self.south, self.east, self.north
 
 class GeoBounds(BBox):
     """Spatial bounding box
